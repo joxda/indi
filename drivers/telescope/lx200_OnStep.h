@@ -118,6 +118,7 @@ class LX200_OnStep : public LX200Generic
     virtual bool updateProperties() override;
     virtual bool ISNewNumber(const char *dev, const char *name, double values[], char *names[], int n) override;
     virtual bool ISNewSwitch(const char *dev, const char *name, ISState *states, char *names[], int n) override;
+        virtual bool ISSnoopDevice(XMLEle *root);
 
   protected:
     virtual void getBasicData() override;

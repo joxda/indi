@@ -22,7 +22,7 @@
 
 */
 
-
+#include <memory>
 #include "lx200_OnStep.h"
 
 #define LIBRARY_TAB  "Library"
@@ -35,6 +35,9 @@
 #define ONSTEP_TIMEOUT  3
 #define RA_AXIS     0
 #define DEC_AXIS    1
+
+// We declare an auto pointer
+std::unique_ptr<LX200_OnStep> lx200_OnStep(new LX200_OnStep());
 
 LX200_OnStep::LX200_OnStep() : LX200Generic()
 {
@@ -772,7 +775,32 @@ bool LX200_OnStep::ISNewNumber(const char *dev, const char *name, double values[
 
     return LX200Generic::ISNewNumber(dev, name, values, names, n);
 }
-
+bool LX200_OnStep::ISSnoopDevice(XMLEle *root)
+{
+    const char *propName = findXMLAttValu(root, "name");
+    if(!strcmp(propName, "Lens"))
+    {
+        XMLEle *lensID = findXMLEle(root, "LENS_ID");
+        //pcdataXMLEle(lensID)
+    }
+    if(!strcmp(propName, "Focal length setting"))
+    {
+        XMLEle *FL = findXMLEle(root, "LENS_FL");
+        std::string::size_type sz;
+        lx200_OnStep->ScopeParametersN[1].value = std::stod(pcdataXMLEle(FL),&sz);
+        lx200_OnStep->ScopeParametersNP.s = IPS_OK;
+		IDSetNumber(&lx200_OnStep->ScopeParametersNP,nullptr);
+    }
+    if(!strcmp(propName, "Aperture"))
+    {
+        XMLEle *ap = findXMLEle(root, "AP_Val");
+        std::string::size_type sz;
+        lx200_OnStep->ScopeParametersN[0].value = std::stod(pcdataXMLEle(ap),&sz);
+        lx200_OnStep->ScopeParametersNP.s = IPS_OK;
+		IDSetNumber(&lx200_OnStep->ScopeParametersNP,nullptr);
+    }
+   return LX200Generic::ISSnoopDevice(root);
+}
 bool LX200_OnStep::ISNewSwitch(const char *dev, const char *name, ISState *states, char *names[], int n)
 {
     int index = 0;
